@@ -7,7 +7,7 @@ import rateLimit from "express-rate-limit";
 const app = express();
 
 app.use(cors({
-    origin : process.env.APP_ORIGIN,
+    origin : process.env.APP_ORIGIN.split(","),
     credentials : true
 }));
 
