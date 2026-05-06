@@ -4,7 +4,8 @@ import  * as userService  from "./user.service.js";
 
 const cookieOption = {
     httpOnly : true,
-    secure : true
+    secure : false, //localhost use ke liye temp solution
+    sameSite : "lax"
 }
 
 export const registerUser = asyncHandler ( async (req, res) => {

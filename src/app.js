@@ -29,6 +29,8 @@ app.use(rateLimit({
     max : 60
 }));
 
+app.set('trust proxy', 1);
+
 import { userRouter } from "./modules/user/user.route.js";
 import { postRouter } from "./modules/post/post.route.js";
 import { likeRouter } from "./modules/like/like.route.js";
