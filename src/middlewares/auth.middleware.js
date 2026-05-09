@@ -15,7 +15,7 @@ export const auth = async (req, res, next) => {
         const user = await User.findById(decodedToken._id).select("+tokenVersion").lean();
         
         if (!user) {
-            throw new ApiError(400, "Invalid or Expiry Token");
+            throw new ApiError(400, "Session expired, please login again");
         }
 
         if (decodedToken.tokenVersion != user.tokenVersion) {

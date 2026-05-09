@@ -61,7 +61,7 @@ export const getUserByUsername = asyncHandler ( async (req, res) => {
 });
 
 export const updateUserDetails = asyncHandler ( async (req, res) => {
-    const updatedUser = userService.updateUserDetailsService(req);
+    const updatedUser = await userService.updateUserDetailsService(req);
 
     return res
     .status(200)
@@ -69,15 +69,15 @@ export const updateUserDetails = asyncHandler ( async (req, res) => {
 });
 
 export const updateUserPassword = asyncHandler ( async (req, res) => {
-    userService.updateUserPasswordService(req);
+    const updatedUser = await userService.updateUserPasswordService(req);
 
     return res
     .status(200)
-    .json(new ApiResponse(200, {}, "password updated successfully"))
+    .json(new ApiResponse(200, updatedUser, "password updated successfully"))
 });
 
 export const updateUserEmail = asyncHandler ( async (req, res) => {
-    const updatedUser = userService.updateUserEmailService(req);
+    const updatedUser = await userService.updateUserEmailService(req);
 
     return res
     .status(200)

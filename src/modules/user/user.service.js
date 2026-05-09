@@ -29,7 +29,7 @@ export const registerUserService = async (data) => {
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
     if (!passwordRegex.test(password)) {
-        throw new ApiError(400, "weak password");
+        throw new ApiError(400, "password atleast 8 characters long and must contain at least one uppercase letter, one lowercase letter, one number and one special character");
     }
 
     //verify existing user
@@ -127,15 +127,24 @@ export const getUserByUsernameService = async (data) => {
 export const updateUserDetailsService = async (data) => {
     const authUser = data.user;
     let {fullName, isProfilePublic} = data.body;
-    fullName = fullName.trim();
+    fullName = fullName?.trim();
 
-    if (!fullName) {
-        throw new ApiError(400, "fullName is required");
+    if (!fullName && typeof isProfilePublic === "undefined") {
+        throw new ApiError(400, "fullName or isProfilePublic, one is required");
     }
 
     const updatedUser = await User.findById(authUser._id);
 
-    updatedUser.fullName = fullName;
+    if (fullName) {
+        const fullNameRegex = /^[A-za-z ]+$/;
+
+        if (!fullNameRegex.test(fullName)) {
+            throw new ApiError(400, "invalid fullName");
+        }
+
+        updatedUser.fullName = fullName;
+    }
+
     if (isProfilePublic === false || isProfilePublic === true) {
         updatedUser.isProfilePublic = isProfilePublic;
     }
@@ -156,12 +165,12 @@ export const updateUserPasswordService = async (data) => {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
 
     if (!passwordRegex.test(newPassword)) {
-        throw new ApiError(400, "weak new password");
+        throw new ApiError(400, "new password atleast 8 characters long and must contain at least one uppercase letter, one lowercase letter, one number and one special character");
     }
 
-    const currentUser = User.findById(authUser._id).select("+password");
+    const currentUser = await User.findById(authUser._id).select("+password");
 
-    const isPasswordCorrect = await currentUser.isPasswordCorrect(newPassword);
+    const isPasswordCorrect = await currentUser.isPasswordCorrect(oldPassword);
 
     if (!isPasswordCorrect) {
         throw new ApiError(400, "wrong currentPassword");
@@ -171,7 +180,9 @@ export const updateUserPasswordService = async (data) => {
 
     await currentUser.save();
 
-    return;
+    currentUser.password = undefined;
+
+    return currentUser;
 }
 
 export const updateUserEmailService = async (data) => {
