@@ -60,6 +60,14 @@ export const getUserByUsername = asyncHandler ( async (req, res) => {
     .json(new ApiResponse(200, searchedUser, "user fatch successfully"))
 });
 
+export const getUserById = asyncHandler ( async (req, res) => {
+    const searchedUser = await userService.getUserByIdService(req);
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, searchedUser, "user fatch successfully"))
+});
+
 export const updateUserDetails = asyncHandler ( async (req, res) => {
     const updatedUser = await userService.updateUserDetailsService(req);
 

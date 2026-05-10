@@ -26,6 +26,22 @@ export const getSearchedUserAllPostByUsername = asyncHandler( async (req, res) =
     .json(new ApiResponse(200, allPosts, "post fetched successfully"))
 });
 
+export const getFeedPosts = asyncHandler( async (req, res) => {
+    const allPosts = await postService.getfeedPostsService(req);
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, allPosts, "feed posts fetched successfully"))
+});
+
+export const getFeedReels = asyncHandler( async (req, res) => {
+    const allReels = await postService.getfeedReelsService(req);
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, allReels, "feed reels fetched successfully"))
+});
+
 export const updatePost = asyncHandler( async (req, res) => {
     const updatedPost = await postService.updatePostService(req);
 

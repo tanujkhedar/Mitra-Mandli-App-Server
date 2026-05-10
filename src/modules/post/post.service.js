@@ -16,6 +16,12 @@ export const createPostService = async (data) => {
         isPublic = true;
     }
 
+    const user = await User.findById(authUser._id);
+
+    if (!user) {
+        throw new ApiError(400, "invalid user");
+    }
+
     const response = await cloudinaryUploader(filePath);
 
     const post = await Post.create(
@@ -33,6 +39,9 @@ export const createPostService = async (data) => {
     if (!post) {
         throw new ApiError(500, "something went wrong while uploading post");
     }
+
+    user.postCount += 1;
+    await user.save();
 
     return post;
 }
@@ -68,6 +77,50 @@ export const getSearchedUserAllPostByUsernameService = async (data) => {
     return allPosts;
 }
 
+export const getfeedPostsService = async (data) => {
+    const feedPosts = await Post.aggregate([
+        {
+            $match : {
+                isPublic : true,
+                resourceType : "image"
+            }
+        },
+        {
+            $sample : {
+                size : 20
+            }
+        }
+    ]);
+
+    if (!feedPosts) {
+        throw new ApiError(500, "something went wrong while getting feed Posts");
+    }
+
+    return feedPosts;
+};
+
+export const getfeedReelsService = async (data) => {
+    const feedReels = await Post.aggregate([
+        {
+            $match : {
+                isPublic : true,
+                resourceType : "video"
+            }
+        },
+        {
+            $sample : {
+                size : 20
+            }
+        }
+    ]);
+
+    if (!feedReels) {
+        throw new ApiError(500, "something went wrong while getting feed Reels");
+    }
+
+    return feedReels;
+};
+
 export const updatePostService = async (data) => {
     const {post_id, title, description, isPublic} = data.body;
 
@@ -91,11 +144,14 @@ export const updatePostService = async (data) => {
 }
 
 export const deletePostService = async (data) => {
+    const authUser = data.user;
     const {post_id} = data.body;
 
     if (!post_id) {
         throw new ApiError(400, "post Id required");
     }
+
+    const user = await User.findById(authUser._id);
 
     const post = await Post.findById(post_id);
 
@@ -106,6 +162,9 @@ export const deletePostService = async (data) => {
     await cloudinaryDestroyar(post.file.public_id);
 
     await Post.findByIdAndDelete(post_id);
+
+    user.postCount -= 1;
+    await user.save();
 
     return;
 }

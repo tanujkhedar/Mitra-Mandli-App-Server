@@ -124,6 +124,23 @@ export const getUserByUsernameService = async (data) => {
     return await User.findById(searchedUser._id).select("-email");
 }
 
+export const getUserByIdService = async (data) => {
+    const { id } = data.params;
+    const authUser = data.user;
+
+    if (!id) {
+        throw new ApiError(400, "please enter userId");
+    }
+
+    const user = await User.findById(id).select("-email");
+
+    if (!user) {
+        throw new ApiError(400, "user not found");
+    }
+
+    return user;
+}
+
 export const updateUserDetailsService = async (data) => {
     const authUser = data.user;
     let {fullName, isProfilePublic} = data.body;

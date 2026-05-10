@@ -78,6 +78,15 @@ const userSchema = new Schema (
         followingCount : {
             type : Number,
             default : 0
+        },
+        postCount : {
+            type : Number,
+            default : 0
+        },
+        bio : {
+            type : String,
+            maxlength : 50,
+            trim : true
         }
     },
     {
