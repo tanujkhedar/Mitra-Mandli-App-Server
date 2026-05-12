@@ -1,33 +1,33 @@
 import { Collection } from "./collection.model.js";
 import { ApiError } from "../../utils/apiError.util.js"
 
-export const createCollectionService = async (data) => {
-    const authUser = data.user;
-    const {title, description} = data.body;
+// export const createCollectionService = async (data) => {
+//     const authUser = data.user;
+//     const {title, description} = data.body;
 
-    if (!title) {
-        throw new ApiError(400, "title is required");
-    }
+//     if (!title) {
+//         throw new ApiError(400, "title is required");
+//     }
 
-    const collection = await Collection.create(
-        {
-            title, 
-            description : description || '', 
-            owner : authUser._id
-        }
-    );
+//     const collection = await Collection.create(
+//         {
+//             title, 
+//             description : description || '', 
+//             owner : authUser._id
+//         }
+//     );
 
-    if (!collection) {
-        throw new ApiError(500, "something went wrong while creating collection");
-    }
+//     if (!collection) {
+//         throw new ApiError(500, "something went wrong while creating collection");
+//     }
 
-    return collection;
-}
+//     return collection;
+//}
 
 export const getCollectionsService = async (data) => {
     const authUser = data.user;
 
-    const collections = await Collection.find({owner : authUser._id}).select("-content");
+    const collections = await Collection.find({owner : authUser._id}).populate("content");
 
     if (!collections) {
         throw new ApiError(500, "something went wrong while fetching collection");
@@ -36,79 +36,90 @@ export const getCollectionsService = async (data) => {
     return collections;
 }
 
-export const getCollectionDataService = async (data) => {
+export const isPostSavedService = async (data) => {
     const authUser = data.user;
-    const {collection_id} = data.body;
+    const {post_id} = data.params;
 
-    if (!collection_id) {
-        throw new ApiError(400, "collection id required");
-    }
+    const isPostSaved = await Collection.findOne({
+        $and : [{owner: authUser._id}, {content: post_id}]
+    });
 
-    const collection = await Collection.findById(collection_id);
-
-    if (!collection) {
-        throw new ApiError(500, "something went wrong while fetching collection");
-    }
-
-    return collection;
+    return  isPostSaved ? true : false
 }
+
+// export const getCollectionDataService = async (data) => {
+//     const authUser = data.user;
+//     const {collection_id} = data.body;
+
+//     if (!collection_id) {
+//         throw new ApiError(400, "collection id required");
+//     }
+
+//     const collection = await Collection.findById(collection_id);
+
+//     if (!collection) {
+//         throw new ApiError(500, "something went wrong while fetching collection");
+//     }
+
+//     return collection;
+// }
 
 export const updateCollectionService = async (data) => {
     const authUser = data.user;
-    const {title, description, collection_id, post_id} = data.body;
+    const {post_id} = data.body;
 
-    if (!collection_id || (!title && !description && !post_id)) {
-        throw new ApiError(400, "collection id or atlist one updating field are required");
+    if (!post_id) {
+        throw new ApiError(400, "post id is required");
     }
 
-    const collection = await Collection.findById(collection_id);
+    const collection = await Collection.findOne({
+        $and : [{owner : authUser._id}, {content : post_id}]
+    });
 
     if (!collection) {
-        throw new ApiError(400, "collection id invalid");
+        const newCollection = await Collection.create({owner: authUser._id, content: post_id});
+        if(newCollection) return true;
+        throw new ApiError(500, "post save failed");
     }
 
-    if (title) collection.title = title;
-    if (description) collection.description = description;
-    if (post_id) collection.content.push(post_id);
+    await Collection.findByIdAndDelete(collection._id);
+    return false;
 
-    await collection.save();
-
-    return collection;
 }
 
-export const removeCollectionService = async (data) => {
-    const authUser = data.user;
-    const {collection_id} = data.body;
+// export const removeCollectionService = async (data) => {
+//     const authUser = data.user;
+//     const {collection_id} = data.body;
 
-    if (!collection_id) {
-        throw new ApiError(400, "collection id required");
-    }
+//     if (!collection_id) {
+//         throw new ApiError(400, "collection id required");
+//     }
 
-    const collection = await Collection.findByIdAndDelete(collection_id);
+//     const collection = await Collection.findByIdAndDelete(collection_id);
 
-    if (!collection) {
-        throw new ApiError(500, "something went wrong while removing collection");
-    }
+//     if (!collection) {
+//         throw new ApiError(500, "something went wrong while removing collection");
+//     }
 
-    return {};
-}
+//     return {};
+// }
 
-export const removeCollectionContentService = async (data) => {
-    const authUser = data.user;
-    const {collection_id, post_id} = data.body;
+// export const removeCollectionContentService = async (data) => {
+//     const authUser = data.user;
+//     const {collection_id, post_id} = data.body;
 
-    if (!collection_id || !post_id) {
-        throw new ApiError(400, "collection or post id required");
-    }
+//     if (!collection_id || !post_id) {
+//         throw new ApiError(400, "collection or post id required");
+//     }
 
-    const collection = await Collection.findById(collection_id);
+//     const collection = await Collection.findById(collection_id);
 
-    if (!collection) {
-        throw new ApiError(500, "something went wrong while removing collection content");
-    }
+//     if (!collection) {
+//         throw new ApiError(500, "something went wrong while removing collection content");
+//     }
 
-    // collection.content
-    // correction needed removing from array type data field
+//     // collection.content
+//     // correction needed removing from array type data field
 
-    return collection;
-}
+//     return collection;
+// }

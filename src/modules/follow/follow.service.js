@@ -2,7 +2,7 @@ import { Follow } from "./follow.model.js";
 import { User } from "../user/user.model.js";
 import { ApiError } from "../../utils/apiError.util.js";
 
-export const createFollowService = async (data) => {
+export const updateFollowService = async (data) => {
     const authUser = data.user;
     const { followedTo } = data.body;
 
@@ -16,7 +16,7 @@ export const createFollowService = async (data) => {
         }
     );
 
-    if (followedTo == authUser._id || isAleradyFollow) {
+    if (followedTo == authUser._id) {
         throw new ApiError(400, "don't be too smart 😎");
     }
 
@@ -25,6 +25,19 @@ export const createFollowService = async (data) => {
 
     if (!followedUser) {
         throw new ApiError(400, "invalid followed user id");
+    }
+
+    if (isAleradyFollow) {
+        await Follow.findOneAndDelete(
+            {
+                $and : [{followedTo}, {followedBy : authUser._id}]
+            }
+        );
+        followedUser.followerCount = followedUser.followerCount - 1;
+        await followedUser.save();
+        followingUser.followingCount = followingUser.followingCount - 1;
+        followingUser.save();
+        return followingUser;
     }
 
     const addFollow = await Follow.create(
@@ -44,39 +57,39 @@ export const createFollowService = async (data) => {
     followingUser.followingCount = followingUser.followingCount + 1;
     followingUser.save();
 
-    return ; // need some improvement
+    return followingUser;
 }
 
-export const removeFollowService = async (data) => {
-    const authUser = data.user;
-    const { followedTo } = data.body;
+// export const removeFollowService = async (data) => {
+//     const authUser = data.user;
+//     const { followedTo } = data.body;
 
-    if (!followedTo) {
-        throw new ApiError(400, "follwed user Id required");
-    }
+//     if (!followedTo) {
+//         throw new ApiError(400, "follwed user Id required");
+//     }
 
-    const followedUser = await User.findById(followedTo);
-    const followingUser = await User.findById(authUser._id);
+//     const followedUser = await User.findById(followedTo);
+//     const followingUser = await User.findById(authUser._id);
 
-    if (!followedUser) {
-        throw new ApiError(400, "invalid followed user id");
-    }
+//     if (!followedUser) {
+//         throw new ApiError(400, "invalid followed user id");
+//     }
 
-    const removeFollow = await Follow.findOneAndDelete(
-        {
-            $and : [{followedBy : authUser._id}, {followedTo : followedTo}]
-        }
-    );
+//     const removeFollow = await Follow.findOneAndDelete(
+//         {
+//             $and : [{followedBy : authUser._id}, {followedTo : followedTo}]
+//         }
+//     );
 
-    if (!removeFollow) {
-        throw new ApiError(400, "alerady unfollowed");
-    }
+//     if (!removeFollow) {
+//         throw new ApiError(400, "alerady unfollowed");
+//     }
 
-    followedUser.followerCount = followedUser.followerCount - 1;
-    await followedUser.save();
+//     followedUser.followerCount = followedUser.followerCount - 1;
+//     await followedUser.save();
 
-    followingUser.followingCount = followingUser.followingCount - 1;
-    followingUser.save();
+//     followingUser.followingCount = followingUser.followingCount - 1;
+//     followingUser.save();
 
-    return ; // need some improvement
-}
+//     return ; // need some improvement
+// }

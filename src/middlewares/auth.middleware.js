@@ -7,7 +7,7 @@ export const auth = async (req, res, next) => {
         const token = req.cookies?.accessToken || req.header?.authorization?.replace("Bearer ", "");
 
         if (!token) {
-            throw new ApiError(400, "unauthorized access");
+            throw new ApiError(400, "Session expired, please login again");
         }
 
         const decodedToken = decodeAcessToken(token);
@@ -19,7 +19,7 @@ export const auth = async (req, res, next) => {
         }
 
         if (decodedToken.tokenVersion != user.tokenVersion) {
-            throw new ApiError(400, "oldAuthorized access");
+            throw new ApiError(400, "Session expired, please login again");
         }
 
         req.user = user;

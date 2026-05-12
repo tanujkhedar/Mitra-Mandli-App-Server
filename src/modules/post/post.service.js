@@ -89,6 +89,31 @@ export const getfeedPostsService = async (data) => {
             $sample : {
                 size : 20
             }
+        },
+        {
+            $lookup : {
+                from : "users",
+                localField : "owner",
+                foreignField : "_id",
+                as : "ownerInfo"
+            }
+        },
+        {
+            $unwind : "$ownerInfo"
+        },
+        {
+            $project : {
+                title : 1,
+                "file.url" : 1,
+                resourceType : 1,
+                updatedAt : 1,
+                likeCount : 1,
+                commentCount : 1,
+                viewCount : 1,
+                "ownerInfo.userName" : 1,
+                "ownerInfo.avatar.url" : 1,
+                "ownerInfo.fullName" : 1
+            }
         }
     ]);
 
@@ -110,6 +135,31 @@ export const getfeedReelsService = async (data) => {
         {
             $sample : {
                 size : 20
+            }
+        },
+        {
+            $lookup : {
+                from : "users",
+                localField : "owner",
+                foreignField : "_id",
+                as : "ownerInfo"
+            }
+        },
+        {
+            $unwind : "$ownerInfo"
+        },
+        {
+            $project : {
+                title : 1,
+                "file.url" : 1,
+                resourceType : 1,
+                updatedAt : 1,
+                likeCount : 1,
+                commentCount : 1,
+                viewCount : 1,
+                "ownerInfo.userName" : 1,
+                "ownerInfo.avatar.url" : 1,
+                "ownerInfo.fullName" : 1
             }
         }
     ]);
