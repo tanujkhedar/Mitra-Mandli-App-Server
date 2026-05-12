@@ -64,8 +64,8 @@ export const getSearchedUserAllPostByUsernameService = async (data) => {
 
     const searchedUser = await User.findOne({userName});
 
-    if (!searchedUser.isProfilePublic) {
-        return {};
+    if (!searchedUser?.isProfilePublic) {
+        return [];
     }
 
     const allPosts = await Post.find({owner : searchedUser._id});
