@@ -25,7 +25,7 @@ app.use(express.urlencoded({
 app.use(helmet());
 
 app.use(rateLimit({
-    windowMs : 1 * 60 * 1000,
+    windowMs : 1 * 1000,
     max : 60
 }));
 

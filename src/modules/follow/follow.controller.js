@@ -10,6 +10,13 @@ export const updateFollow = asyncHandler( async (req, res) => {
     .json(new ApiResponse(200, updatedInfo, "following updated successfully"))
 });
 
+export const isFollowingByCurrentUser = asyncHandler( async (req, res) => {
+    const isFollow = await followService.isFollowingByCurrentUserService(req);
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, isFollow, "follow check successfully"));
+})
 // export const removeFollow = asyncHandler( async (req, res) => {
 //     const updatedInfo = await followService.removeFollowService(req);
 

@@ -113,7 +113,7 @@ export const getUserByUsernameService = async (data) => {
         throw new ApiError(400, "please enter userNmae");
     }
 
-    const searchedUser = await User.findOne({ userName }).select("+blockedUsers");
+    const searchedUser = await User.findOne({ userName }).select("+blockedUsers -email");
 
     // kya current user bloked by searchedUser
     if (!searchedUser || searchedUser?.blockedUsers.includes(authUser._id)) {
@@ -121,7 +121,9 @@ export const getUserByUsernameService = async (data) => {
     }
 
     // remove sensitiv data like email
-    return await User.findById(searchedUser._id).select("-email");
+    // console.log("searcheduser:- ", searchedUser);
+    
+    return searchedUser;
 }
 
 export const getUserByIdService = async (data) => {

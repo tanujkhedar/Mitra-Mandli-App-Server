@@ -10,9 +10,9 @@ export const updateFollowService = async (data) => {
         throw new ApiError(400, "follwed user Id required");
     }
 
-    const isAleradyFollow = Follow.findOne(
+    const isAleradyFollow = await Follow.findOne(
         {
-            $and : [{followedTo}, {followedBy : authUser._id}]
+            followedTo, followedBy : authUser._id
         }
     );
 
@@ -28,16 +28,17 @@ export const updateFollowService = async (data) => {
     }
 
     if (isAleradyFollow) {
+        console.log(isAleradyFollow)
         await Follow.findOneAndDelete(
             {
-                $and : [{followedTo}, {followedBy : authUser._id}]
+                followedTo, followedBy : authUser._id
             }
         );
         followedUser.followerCount = followedUser.followerCount - 1;
         await followedUser.save();
         followingUser.followingCount = followingUser.followingCount - 1;
-        followingUser.save();
-        return followingUser;
+        await followingUser.save();
+        return false;
     }
 
     const addFollow = await Follow.create(
@@ -55,10 +56,23 @@ export const updateFollowService = async (data) => {
     await followedUser.save();
 
     followingUser.followingCount = followingUser.followingCount + 1;
-    followingUser.save();
+    await followingUser.save();
 
-    return followingUser;
+    return true;
 }
+
+export const isFollowingByCurrentUserService = async (data) => {
+    const authUser = data.user;
+    const {searcheduser_id} = data.params;
+
+    const isFollowing = await Follow.findOne({
+        followedBy : authUser._id,
+        followedTo : searcheduser_id
+    });
+
+    return isFollowing ? true : false
+}
+
 
 // export const removeFollowService = async (data) => {
 //     const authUser = data.user;

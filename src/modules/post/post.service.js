@@ -112,7 +112,8 @@ export const getfeedPostsService = async (data) => {
                 viewCount : 1,
                 "ownerInfo.userName" : 1,
                 "ownerInfo.avatar.url" : 1,
-                "ownerInfo.fullName" : 1
+                "ownerInfo.fullName" : 1,
+                "ownerInfo._id" : 1
             }
         }
     ]);
@@ -159,7 +160,8 @@ export const getfeedReelsService = async (data) => {
                 viewCount : 1,
                 "ownerInfo.userName" : 1,
                 "ownerInfo.avatar.url" : 1,
-                "ownerInfo.fullName" : 1
+                "ownerInfo.fullName" : 1,
+                "ownerInfo._id" : 1
             }
         }
     ]);
